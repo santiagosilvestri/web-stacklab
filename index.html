@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#f7f8f5">
 <meta name="description" content="Laboratorio interactivo para comprender, practicar y visualizar las operaciones de push_swap.">
-<link rel="canonical" href="https://santiagosilvestri.github.io/web-stacklab/">
+<link rel="canonical" href="https://santiagosilvestri.github.io/stacklab/">
 <title>Stacklab — Laboratorio de push_swap</title>
 <link rel="stylesheet" href="styles.css">
 </head>
@@ -13,9 +13,8 @@
 <div class="wrap" id="app">
   <header>
     <div class="brand"><div class="mark" aria-hidden="true"><svg viewBox="0 0 36 36" focusable="false"><rect x="2" y="2" width="32" height="32" rx="8" fill="#304640"/><rect x="8" y="22" width="8" height="6" rx="1.5" fill="#b4e1c0"/><rect x="8" y="14" width="8" height="6" rx="1.5" fill="#b4e1c0"/><rect x="8" y="6" width="8" height="6" rx="1.5" fill="#b4e1c0"/><rect x="20" y="22" width="8" height="6" rx="1.5" fill="#d4b9ed"/><rect x="20" y="14" width="8" height="6" rx="1.5" fill="#d4b9ed"/></svg></div><div class="brand-name">stack<em>lab</em></div><div class="brand-meta">El laboratorio visual<br>de push_swap</div></div>
-    <div class="header-right"><span class="header-hint">Practicá · experimentá · aprendé</span><nav class="mode-tabs" aria-label="Modo de trabajo"><button type="button" id="tabManual" class="active" aria-pressed="true">Practicar</button><button type="button" id="tabReplay" aria-pressed="false">Reproducir</button></nav></div>
+    <div class="header-right"><nav class="mode-tabs" aria-label="Modo de trabajo"><button type="button" id="tabManual" class="active" aria-pressed="true">Practicar</button><button type="button" id="tabReplay" aria-pressed="false">Reproducir</button></nav></div>
   </header>
-  <div class="intro"><div><div class="eyebrow">PUSH_SWAP · LABORATORIO VISUAL</div><h1 id="pageHeading">Entendé cada movimiento.</h1><p id="pageSubtitle">Probá una idea arrastrando fichas, o resolvé paso a paso con las operaciones.</p></div></div>
   <section class="setup" aria-label="Preparar los números">
     <div class="setup-group"><label for="numbersInput">Números iniciales · pila A</label><div class="setup-row"><input id="numbersInput" type="text" value="4 1 5 2 3" spellcheck="false" autocomplete="off" aria-describedby="numberError"><button type="button" id="copyNumbers" class="icon-copy" title="Copiar los números iniciales de las pilas" aria-label="Copiar números cargados al portapapeles"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg></button><button class="btn solid" id="loadNumbers">Cargar números</button></div><div id="numberError" class="inline-error" role="alert"></div></div>
     <div class="sep" aria-hidden="true"></div>
@@ -29,7 +28,7 @@
   <main class="grid">
     <section class="panel workspace" aria-label="Visualización de las pilas">
       <div class="section-head"><div><div class="eyebrow">Área de trabajo</div><h2>Mové las fichas para ordenar</h2></div><div class="work-actions"><button type="button" class="undo-action" id="undoAction" title="Deshacer movimiento" aria-label="Deshacer último movimiento">↶ Deshacer</button><button type="button" class="sketch-btn" id="sketchBtn" aria-pressed="false" title="Mover cualquier ficha sin modificar la secuencia">✎ Borrador libre</button><div class="state" id="solutionState" role="status">Por resolver</div></div></div>
-      <div class="visual-tools" aria-label="Opciones de visualización">
+      <div class="visual-tools" id="viewControls" aria-label="Opciones de visualización">
         <div class="visual-switch-group"><span class="visual-label">Ver fichas como</span><div class="visual-tabs" role="group" aria-label="Representación de los números"><button type="button" data-view="value" class="selected" aria-pressed="true">Valores</button><button type="button" data-view="index" aria-pressed="false">Índices</button><button type="button" data-view="binary" aria-pressed="false">Índice binario</button></div></div>
         
       </div>
@@ -59,7 +58,7 @@
           </div>
         </div>
       </section>
-      <div class="drag-guide" id="dragGuide"><strong>Arrastrá y soltá sobre un destino resaltado</strong><span><kbd>A → B</kbd> pb</span><span><kbd>primero → segundo</kbd> sa</span><span><kbd>primero → final</kbd> ra</span><span><kbd>último → primero</kbd> rra</span><span class="touch-tip">También podés tocar una ficha para ver opciones.</span></div><div class="quick-actions" id="quickActions" hidden aria-live="polite"></div>
+      <div class="quick-actions" id="quickActions" hidden aria-live="polite"></div>
       <div class="sketch-note" id="sketchNote" hidden><span><strong>Borrador visual.</strong> Podés mover cualquier ficha a cualquier posición, como en un tablero. No se generan instrucciones: tu solución e historial original permanecen intactos.</span><button id="discardSketch" type="button">Descartar borrador</button></div>
       <div class="drag-preview" id="dragPreview" role="status" aria-live="polite"><div class="drag-preview-code" id="dragPreviewCode">pb</div><div class="drag-preview-text"><strong id="dragPreviewTitle">Vista previa del movimiento</strong><span id="dragPreviewDetail"></span></div></div>
       <div class="last-action" aria-live="polite"><div class="last-op idle" id="lastOp">—</div><div><div class="action-name" id="actionName">Listo para empezar</div><div class="action-detail" id="actionDetail">Usá los botones de operaciones. Los números de arriba son los primeros de cada pila.</div></div></div>
@@ -67,12 +66,12 @@
       <p class="keyboard">Usá <kbd>←</kbd> y <kbd>→</kbd> para deshacer y rehacer. <kbd>Espacio</kbd> reproduce o pausa. Hacé clic en el historial para saltar a un paso.</p>
     </section>
     <aside class="panel sidebar" aria-label="Reproductor e historial">
-      <section class="mode-replay"><div class="sidebar-head"><h2>Reproducí tu solución</h2><span class="eyebrow">REPRODUCTOR</span></div><p class="sidebar-intro">Pegá la salida de tu programa <code>push_swap</code>. La web aplicará las instrucciones a los números que cargaste arriba.</p><label class="label" for="operationsInput">Operaciones · una por línea</label><textarea class="op-input" id="operationsInput" spellcheck="false" placeholder="pb&#10;sa&#10;pa&#10;ra"></textarea><div id="operationsError" class="inline-error" role="alert"></div><p class="op-help">Admite <code>sa sb ss pa pb ra rb rr rra rrb rrr</code>. No se ignoran instrucciones inválidas.</p><button class="btn solid" id="loadOperations" style="width:100%">Cargar operaciones →</button><div class="example-actions" role="group" aria-label="Ejemplos resueltos"><span class="example-label">Ejemplos resueltos</span><div class="example-buttons"><button type="button" class="btn textlike" id="example5Btn">5 números</button><button type="button" class="btn textlike" id="example10Btn">10 números</button></div></div></section>
+      <section class="mode-replay"><div class="sidebar-head"><h2>Reproducí tu solución</h2><span class="eyebrow">REPRODUCTOR</span></div><p class="sidebar-intro">Pegá la salida de tu programa <code>push_swap</code>.</p><label class="label" for="operationsInput">Operaciones · una por línea</label><textarea class="op-input" id="operationsInput" spellcheck="false" placeholder="pb&#10;sa&#10;pa&#10;ra"></textarea><div id="operationsError" class="inline-error" role="alert"></div><p class="op-help">Admite <code>sa sb ss pa pb ra rb rr rra rrb rrr</code>. No se ignoran instrucciones inválidas.</p><button class="btn solid" id="loadOperations" style="width:100%">Cargar operaciones →</button><div class="example-actions" role="group" aria-label="Ejemplos resueltos"><span class="example-label">Ejemplos resueltos</span><div class="example-buttons"><button type="button" class="btn textlike" id="example5Btn">5 números</button><button type="button" class="btn textlike" id="example10Btn">10 números</button></div></div></section>
       <div class="side-divider"></div>
       <div class="history-title"><h3>Secuencia <span style="color:#9aa39b;font:12px ui-monospace,monospace" id="historyCount">(0)</span></h3><div class="history-tools"><button id="copyBtn" class="text-button" title="Copiar todas las instrucciones de push_swap">Copiar operaciones</button><button id="clearBtn" class="text-button" title="Borrar la secuencia y volver al estado inicial">Reiniciar</button></div></div>
       <div class="history" id="history" aria-label="Historial navegable de movimientos"></div>
       <div class="stats"><div class="stat"><span>Paso actual</span><strong id="statMoves">0</strong></div><div class="stat"><span>En A</span><strong id="statA">5</strong></div><div class="stat"><span>En B</span><strong id="statB">0</strong></div></div>
-      <div class="history-tip" id="historyTip">Elegí cualquier paso para revisar A y B. Si realizás un movimiento nuevo desde ahí, se crea una nueva rama y se descartan los pasos posteriores.</div><div class="side-footer" id="sideFooter">Meta: A ordenada de menor a mayor y B vacía. Si una operación no cambia nada, se indicará en el historial.</div>
+      <div class="history-tip" id="historyTip">Elegí cualquier paso para revisar A y B. Si realizás un movimiento nuevo desde ahí, se crea una nueva rama y se descartan los pasos posteriores.</div>
     </aside>
   </main>
   <footer class="footer"><span>STACKLAB · LABORATORIO DE PUSH_SWAP</span></footer>
