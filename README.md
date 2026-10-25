@@ -6,12 +6,12 @@ Stacklab uses two stacks, **A** and **B**, and the eleven standard `push_swap` o
 
 ## Live demo
 
-**[Open Stacklab](https://santiagosilvestri.github.io/stacklab/)**
+**[Open Stacklab](https://santiagosilvestri.github.io/web-stacklab/)**
 
 Copy and paste this address into your browser:
 
 ```text
-https://santiagosilvestri.github.io/stacklab/
+https://santiagosilvestri.github.io/web-stacklab/
 ```
 
 *The link becomes available once the repository is published with GitHub Pages enabled.*
@@ -22,7 +22,7 @@ https://santiagosilvestri.github.io/stacklab/
 - **Replay mode:** paste a sequence produced by your own `push_swap` program, then play, pause, step through, or jump to any operation. Supports up to 500 numbers and 30,000 instructions.
 - **Playback controls:** adjustable speed from `0.5×` to `1000×`, timeline navigation, and one-click replay from the beginning after the final step.
 - **Number generator:** quick sizes of 3, 5, 10, 30, 100, or 500; custom size, range, optional seed, and an optional disorder percentage based on inversions.
-- **Three visualizations:** values, normalized indices, and binary indices for up to 30 numbers. With 31 or more, Stacklab automatically switches to compact bars and hides the unnecessary view selector.
+- **Three visualizations:** values, normalized indices, and binary indices. Labels are hidden automatically for large sets to keep the stacks readable.
 - **Copy and paste workflow:** copy the initial numbers for your local executable, then paste the resulting operations into Stacklab.
 - **Built-in examples:** verified 5-number and 10-number solutions.
 - **Validation:** detects invalid or repeated numbers, unsupported instructions, ineffective moves, and whether stack A is sorted with stack B empty.
@@ -67,14 +67,14 @@ Stacklab visualizes instructions; it does **not** run your local C executable or
 Download or clone the repository and open `index.html` in a modern browser. All files work directly from disk; no local server is required.
 
 ```text
-stacklab/
+web-stacklab/
 ├── index.html    # Page structure
 ├── styles.css    # Layout, colors, responsive styles and animations
 ├── app.js        # Stack operations, state, generator and playback
 └── README.md     # Documentation
 ```
 
-To publish the website, place these four files in the **root of the `main` branch** of the `stacklab` repository and enable **Settings → Pages → Deploy from a branch → main / (root)**.
+To publish the website, place these four files in the **root of the `main` branch** of the `web-stacklab` repository and enable **Settings → Pages → Deploy from a branch → main / (root)**.
 
 ## Technical notes
 
