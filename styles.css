@@ -650,3 +650,45 @@ body.is-dragging .stack-box.drop-allowed .stack-direction::after{content:none}
 
 /* For dense stacks, indices are not rendered, so the view picker is hidden. */
 .visual-tools[hidden]{display:none!important}
+
+/* Wide-screen workspace: use available desktop space without changing the
+   compact laptop/tablet/mobile layouts or Stacklab's existing visual language. */
+@media (min-width: 1600px) {
+  .wrap {
+    max-width: 2200px;
+    padding: 0 clamp(28px, 2.1vw, 42px) 42px;
+  }
+  .setup {
+    grid-template-columns: minmax(0, 1fr) 1px minmax(610px, .86fr);
+    align-items: center;
+    gap: clamp(18px, 1.4vw, 30px);
+    padding: 19px clamp(20px, 1.35vw, 30px);
+    margin-bottom: 20px;
+  }
+  .setup-group { min-width: 0; }
+  .gen-row { gap: 10px; }
+  .grid {
+    grid-template-columns: minmax(0, 1fr) clamp(290px, 19vw, 360px);
+    gap: clamp(18px, 1.3vw, 26px);
+  }
+  .workspace { padding: 0 clamp(21px, 1.35vw, 30px) 24px; }
+  .stack-layout { gap: clamp(14px, 1vw, 22px); }
+  .stack-top { padding: 14px 18px; }
+  .stack-direction { padding-left: 18px; padding-right: 18px; }
+  .stack-box.fit-bars .stack-viewport {
+    /* Minimum height helps short exercises; larger exercises get more room. */
+    height: clamp(255px, min(var(--preferred-height), 52vh), 560px);
+    padding-left: clamp(12px, 1vw, 20px);
+    padding-right: clamp(12px, 1vw, 20px);
+  }
+  .sidebar { padding: 20px; }
+  .sidebar .history { max-height: min(43vh, 450px); }
+  .controls {
+    display: grid;
+    grid-template-columns: max-content minmax(0, 1fr) minmax(180px, 225px);
+    align-items: center;
+    gap: clamp(14px, 1vw, 22px);
+  }
+  .timeline-wrap { min-width: 0; width: 100%; }
+  .speed-control { width: 100%; min-width: 0; max-width: none; }
+}

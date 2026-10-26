@@ -145,7 +145,7 @@ try {
     box.classList.toggle('show-binary', S.view === 'binary');
     box.classList.toggle('show-index', S.view === 'index');
     target.style.setProperty('--total-rows', String(S.initial.length));
-    target.style.setProperty('--preferred-height', Math.max(190, Math.min(335, S.initial.length * 35 + 28)) + 'px');
+    target.style.setProperty('--preferred-height', Math.max(190, Math.min(560, S.initial.length * 35 + 28)) + 'px');
     target.replaceChildren(); const frag = document.createDocumentFragment();
     if (arr.length === 0) { const empty = document.createElement('div'); empty.className = 'empty-stack'; empty.innerHTML = '<span class="empty-mark" aria-hidden="true"></span><span>Pila vacía</span>'; frag.appendChild(empty) }
     else { for (let i = 0; i < arr.length; i++)frag.appendChild(makeRow(arr[i], i, S.initial.length, changed.has(arr[i]))) }
