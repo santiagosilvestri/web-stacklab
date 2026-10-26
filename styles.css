@@ -433,11 +433,11 @@ body.is-dragging .stack-box.drop-allowed .stack-direction::after{content:none}
  .drag-preview.visible, .dock-collapsed .drag-preview.visible{bottom:15px}
 }
 @media(max-width:345px){.setup .gen-row #generateBtn{flex:1}}
-/* Value bars read toward the central axis on each side; binary bits keep their normal left-to-right order. */
-.stack-box.b:not(.show-binary) .stack-row:not(.row-binary){direction:rtl}
-.stack-box.b:not(.show-binary) .row-fill{margin-left:auto}
-.stack-box.b:not(.show-binary) .row-num{direction:ltr;text-align:left}
-.stack-box.b:not(.show-binary) .row-index{direction:ltr;text-align:left}
+/* Stack B starts aligned with A; remove .align-left for mirrored bars. */
+.stack-box.b:not(.align-left):not(.show-binary) .stack-row:not(.row-binary){direction:rtl}
+.stack-box.b:not(.align-left):not(.show-binary) .row-fill{margin-left:auto}
+.stack-box.b:not(.align-left):not(.show-binary) .row-num{direction:ltr;text-align:left}
+.stack-box.b:not(.align-left):not(.show-binary) .row-index{direction:ltr;text-align:left}
 
 /* focus the stacks, compact operation rows, and fit all bars without nested scrolling. */
 @media (min-width:901px){
@@ -502,10 +502,10 @@ body.is-dragging .stack-box.drop-allowed .stack-direction::after{content:none}
 .stack-box.micro-bars .row-track{height:100%!important;border-radius:0}
 .stack-box.micro-bars .row-fill{border-radius:0;min-width:1px}
 .stack-box.micro-bars .stack-viewport{padding-bottom:6px}
-/* The binary view is just the binary rank, keeping the same bars and mirrored piles. */
-.stack-box.b.show-binary .stack-row.row-binary{direction:rtl}
-.stack-box.b.show-binary .row-num, .stack-box.b.show-binary .row-index{direction:ltr;text-align:left}
-.stack-box.b.show-binary .row-fill{margin-left:auto}
+/* Binary ranks use the same B orientation preference as value and index views. */
+.stack-box.b:not(.align-left).show-binary .stack-row.row-binary{direction:rtl}
+.stack-box.b:not(.align-left).show-binary .row-num, .stack-box.b:not(.align-left).show-binary .row-index{direction:ltr;text-align:left}
+.stack-box.b:not(.align-left).show-binary .row-fill{margin-left:auto}
 @media(max-width:900px){.sidebar{padding:15px}.ops-single-row{gap:5px}}
 @media(max-width:590px){
  .ops-workbench{padding:9px 7px;margin-top:10px}
@@ -707,3 +707,28 @@ body.is-dragging .stack-box.drop-allowed .stack-direction::after{content:none}
 .drop-overlay{display:none;pointer-events:none;position:absolute;inset:0;z-index:2;align-items:center;justify-content:center;flex-direction:column;gap:10px;border:2px dashed #729581;border-radius:6px;color:#345f49;background:#eef5eef2;font-size:12px;font-weight:650;padding:16px;text-align:center}
 .operation-dropzone.dragging .drop-overlay{display:flex}
 @media(prefers-reduced-motion:reduce){.operation-dropzone{transition:none}}
+
+
+/* Optional B orientation. Defaults to aligned; align-left shares A's geometry.
+   The class is on the pile container, so every mode and density inherits it. */
+.mirror-b-toggle{
+  display:inline-flex;align-items:center;justify-content:center;gap:5px;
+  flex:0 0 auto;min-height:28px;padding:4px 8px;
+  border:1px solid #cec6e0;border-radius:7px;
+  background:#eeeaf6;color:#645681;
+  font:700 10px ui-monospace,SFMono-Regular,Consolas,monospace;
+  line-height:1.1;white-space:nowrap;cursor:pointer;
+}
+.mirror-b-toggle:hover{background:#e6e0f1;border-color:#bcaed6}
+.mirror-b-toggle[aria-pressed="false"]{background:#f9f7fc;border-color:#ddd7e8}
+.mirror-b-icon{font-size:14px;line-height:1}
+.stack-box.b .stack-amount{margin-left:auto}
+@media(max-width:700px){
+  .stack-box.b .stack-top>.eyebrow{display:none}
+  .stack-box.b .stack-top{gap:5px}
+  .mirror-b-toggle{min-height:27px;padding:4px 6px;gap:3px;font-size:9px}
+}
+@media(max-width:365px){
+  .mirror-b-toggle{padding:3px 4px;gap:2px}
+  .mirror-b-icon{font-size:12px}
+}

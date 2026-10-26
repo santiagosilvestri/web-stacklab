@@ -5,7 +5,7 @@
   const D = { sa: ['Intercambiar A', 'Intercambia los dos elementos superiores de A.'], sb: ['Intercambiar B', 'Intercambia los dos elementos superiores de B.'], ss: ['Intercambiar A y B', 'Intercambia los dos primeros de ambas pilas.'], pa: ['Pasar a A', 'Mueve el primer elemento de B al principio de A.'], pb: ['Pasar a B', 'Mueve el primer elemento de A al principio de B.'], ra: ['Rotar A', 'Pasa el primer elemento de A al final.'], rb: ['Rotar B', 'Pasa el primer elemento de B al final.'], rr: ['Rotar A y B', 'Rota las dos pilas hacia arriba.'], rra: ['Rotar A al revés', 'Mueve el último elemento de A al principio.'], rrb: ['Rotar B al revés', 'Mueve el último elemento de B al principio.'], rrr: ['Rotar A y B al revés', 'Rota las dos pilas hacia abajo.'] };
   const LIM = 500, MANUAL_LIM = 30, VISIBLE_LABEL_LIMIT = 30, MAX_OPS = 100000, MAX_TEXT_BYTES = 1024 * 1024, CHECK = 64, MIN = -2147483648, MAX = 2147483647;
   const SPEEDS = [{ label: '0,5×', factor: .5, description: 'medio ritmo' }, { label: '1×', factor: 1, description: 'normal' }, { label: '2×', factor: 2, description: 'doble' }, { label: '5×', factor: 5, description: 'cinco veces' }, { label: '10×', factor: 10, description: 'diez veces' }, { label: '20×', factor: 20, description: 'veinte veces' }, { label: '50×', factor: 50, description: 'cincuenta veces' }, { label: '100×', factor: 100, description: 'cien veces' }, { label: '250×', factor: 250, description: 'doscientas cincuenta veces' }, { label: '500×', factor: 500, description: 'quinientas veces' }, { label: '1000×', factor: 1000, description: 'mil veces' }];
-  const S = { mode: 'manual', saved: {}, initial: [4, 1, 5, 2, 3], a: [4, 1, 5, 2, 3], b: [], ops: [], noops: [], cursor: 0, check: new Map(), ranks: new Map(), timer: null, playing: false, delay: 500, playLastAt: 0, playCarry: 0, sketch: null, view: 'value' };
+  const S = { bMirrored: false, mode: 'manual', saved: {}, initial: [4, 1, 5, 2, 3], a: [4, 1, 5, 2, 3], b: [], ops: [], noops: [], cursor: 0, check: new Map(), ranks: new Map(), timer: null, playing: false, delay: 500, playLastAt: 0, playCarry: 0, sketch: null, view: 'value' };
   let toastTimer = null; const animations = [];
   function alertUser(msg, bad = false) { const e = $('toast'); e.textContent = msg; e.classList.toggle('error', bad); e.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => e.classList.remove('show'), 3000) }
   function showError(id, msg) { const e = $(id); e.textContent = msg; e.classList.toggle('visible', !!msg) }
@@ -48,6 +48,20 @@
       button.classList.toggle('selected', selected);
       button.setAttribute('aria-pressed', String(selected));
     });
+  }
+  // Presentation preference only: never change order, operations, or playback cursor.
+  function toggleBAlignment() {
+    if (pointerDrag) return; // A live drag keeps its original coordinates.
+    cancelAnimations();
+    S.bMirrored = !S.bMirrored;
+    $('boxB').classList.toggle('align-left', !S.bMirrored);
+    $('mirrorBBtn').setAttribute('aria-pressed', String(S.bMirrored));
+    $('mirrorBLabel').textContent = S.bMirrored ? 'Espejado' : 'Alineado';
+    const description = S.bMirrored
+      ? 'Pila B: Espejado. Pulsar para mostrar barras alineadas a la izquierda'
+      : 'Pila B: Alineado. Pulsar para mostrar barras espejadas';
+    $('mirrorBBtn').setAttribute('aria-label', description);
+    $('mirrorBBtn').title = description;
   }
   function switchView(next) {
     if (!['value', 'index', 'binary'].includes(next)) return;
@@ -468,6 +482,7 @@ const d = pointerDrag; if (!d || d.id !== e.pointerId) return; const dx = e.clie
   document.querySelectorAll('.size-preset').forEach(btn => btn.addEventListener('click', () => { $('countInput').value = btn.dataset.size; syncPreset(); }));
   function syncPreset() { const value = $('countInput').value; document.querySelectorAll('.size-preset').forEach(b => { const on = b.dataset.size === value; b.classList.toggle('selected', on); b.setAttribute('aria-pressed', String(on)) }) }
   document.querySelectorAll('[data-view]').forEach(b => b.addEventListener('click', () => switchView(b.dataset.view)));
+  $('mirrorBBtn').addEventListener('click', toggleBAlignment);
   $('copyNumbers').addEventListener('click', copyNumbers); $('loadNumbers').addEventListener('click', loadManualNumbers); $('numbersInput').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); loadManualNumbers() } }); $('generateBtn').addEventListener('click', generate); $('countInput').addEventListener('input', syncPreset);
   $('tabManual').addEventListener('click', () => setMode('manual')); $('tabReplay').addEventListener('click', () => setMode('replay')); document.querySelectorAll('[data-op]').forEach(btn => btn.addEventListener('click', () => manually(btn.dataset.op)));
   $('loadOperations').addEventListener('click', loadSequence); installTxtImporter();
