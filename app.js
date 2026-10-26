@@ -3,7 +3,7 @@
   const $ = id => document.getElementById(id);
   const OPS = ['sa', 'sb', 'ss', 'pa', 'pb', 'ra', 'rb', 'rr', 'rra', 'rrb', 'rrr'];
   const D = { sa: ['Intercambiar A', 'Intercambia los dos elementos superiores de A.'], sb: ['Intercambiar B', 'Intercambia los dos elementos superiores de B.'], ss: ['Intercambiar A y B', 'Intercambia los dos primeros de ambas pilas.'], pa: ['Pasar a A', 'Mueve el primer elemento de B al principio de A.'], pb: ['Pasar a B', 'Mueve el primer elemento de A al principio de B.'], ra: ['Rotar A', 'Pasa el primer elemento de A al final.'], rb: ['Rotar B', 'Pasa el primer elemento de B al final.'], rr: ['Rotar A y B', 'Rota las dos pilas hacia arriba.'], rra: ['Rotar A al revés', 'Mueve el último elemento de A al principio.'], rrb: ['Rotar B al revés', 'Mueve el último elemento de B al principio.'], rrr: ['Rotar A y B al revés', 'Rota las dos pilas hacia abajo.'] };
-  const LIM = 500, MANUAL_LIM = 30, VISIBLE_LABEL_LIMIT = 30, MAX_OPS = 30000, CHECK = 64, MIN = -2147483648, MAX = 2147483647;
+  const LIM = 500, MANUAL_LIM = 30, VISIBLE_LABEL_LIMIT = 30, MAX_OPS = 100000, MAX_TEXT_BYTES = 1024 * 1024, CHECK = 64, MIN = -2147483648, MAX = 2147483647;
   const SPEEDS = [{ label: '0,5×', factor: .5, description: 'medio ritmo' }, { label: '1×', factor: 1, description: 'normal' }, { label: '2×', factor: 2, description: 'doble' }, { label: '5×', factor: 5, description: 'cinco veces' }, { label: '10×', factor: 10, description: 'diez veces' }, { label: '20×', factor: 20, description: 'veinte veces' }, { label: '50×', factor: 50, description: 'cincuenta veces' }, { label: '100×', factor: 100, description: 'cien veces' }, { label: '250×', factor: 250, description: 'doscientas cincuenta veces' }, { label: '500×', factor: 500, description: 'quinientas veces' }, { label: '1000×', factor: 1000, description: 'mil veces' }];
   const S = { mode: 'manual', saved: {}, initial: [4, 1, 5, 2, 3], a: [4, 1, 5, 2, 3], b: [], ops: [], noops: [], cursor: 0, check: new Map(), ranks: new Map(), timer: null, playing: false, delay: 500, playLastAt: 0, playCarry: 0, sketch: null, view: 'value' };
   let toastTimer = null; const animations = [];
@@ -11,7 +11,7 @@
   function showError(id, msg) { const e = $(id); e.textContent = msg; e.classList.toggle('visible', !!msg) }
   function integer(raw, label) { const t = String(raw).trim(); if (!/^[+-]?\d+$/.test(t)) throw Error(`${label}: ingresá un número entero válido.`); const n = Number(t); if (!Number.isSafeInteger(n) || n < MIN || n > MAX) throw Error(`${label}: fuera del rango de enteros de 32 bits.`); return n }
   function parseNumbers(raw) { const a = raw.trim().split(/[\s,;]+/).filter(Boolean); if (!a.length) throw Error('Ingresá al menos un número.'); if (a.length > LIM) throw Error(`La visualización admite hasta ${LIM} números.`); const v = a.map((x, i) => integer(x, `Número ${i + 1}`)); if (new Set(v).size !== v.length) throw Error('Los números no pueden repetirse.'); return v }
-  function parseOps(raw) { let output = []; const lines = raw.split(/\r?\n/); for (let ln = 0; ln < lines.length; ln++) { const content = lines[ln].split('#')[0].trim(); if (!content) continue; for (const token of content.split(/[\s,;]+/).filter(Boolean)) { if (!OPS.includes(token)) throw Error(`Línea ${ln + 1}: «${token}» no es una operación válida.`); output.push(token); if (output.length > MAX_OPS) throw Error(`Máximo ${MAX_OPS} instrucciones.`) } } return output }
+  function parseOps(raw) { let output = []; const lines = raw.split(/\r?\n/); for (let ln = 0; ln < lines.length; ln++) { const content = lines[ln].split('#')[0].trim(); if (!content) continue; for (const token of content.split(/[\s,;]+/).filter(Boolean)) { if (!OPS.includes(token)) throw Error(`Línea ${ln + 1}: «${token}» no es una operación válida.`); output.push(token); if (output.length > MAX_OPS) throw Error(`Máximo ${MAX_OPS.toLocaleString("es-ES")} instrucciones.`) } } return output }
   function seeded(seed) { if (!seed) return Math.random; let h = 2166136261; for (let i = 0; i < seed.length; i++) { h ^= seed.charCodeAt(i); h = Math.imul(h, 16777619) } return () => { h ^= h << 13; h ^= h >>> 17; h ^= h << 5; return (h >>> 0) / 4294967296 } }
   function sample(n, min, max, seed) { const span = max - min + 1; if (n > span) throw Error('No hay suficientes enteros distintos en el intervalo elegido.'); let rand = seeded(seed); const map = new Map(), out = []; for (let i = 0; i < n; i++) { const j = i + Math.floor(rand() * (span - i)); const a = map.has(i) ? map.get(i) : i, b = map.has(j) ? map.get(j) : j; map.set(j, a); out.push(b + min) } for (let i = n - 1; i > 0; i--) { let j = Math.floor(rand() * (i + 1));[out[i], out[j]] = [out[j], out[i]] } return out }
   // Distance to a sorted stack, measured as inverted pairs (0–100%).
@@ -67,7 +67,7 @@
   function buildCheckpoints() { const a = S.initial.slice(), b = []; S.check = new Map([[0, snapshot(a, b)]]); S.noops = []; for (let i = 0; i < S.ops.length; i++) { const prev = snapshot(a, b); mutate(a, b, S.ops[i]); S.noops.push(same(prev.a, a) && same(prev.b, b)); if ((i + 1) % CHECK === 0) S.check.set(i + 1, snapshot(a, b)) } return solved(a, b) }
   function stateAt(pos) { let k = Math.floor(pos / CHECK) * CHECK; while (k > 0 && !S.check.has(k)) k -= CHECK; const base = S.check.get(k) || snapshot(S.initial, []), { a, b } = snapshot(base.a, base.b); for (let i = k; i < pos; i++)mutate(a, b, S.ops[i]); return { a, b } }
   function jump(pos, animate = false) { if (S.sketch) return; hideQuickActions(); stop(); const previous = S.cursor; pos = Math.max(0, Math.min(S.ops.length, Math.floor(pos))); if (pos === previous) { draw(false); return } const obj = stateAt(pos); S.a = obj.a; S.b = obj.b; S.cursor = pos; draw(animate && Math.abs(pos - previous) === 1) }
-  function manually(op, dropFrom = null) { if (S.mode !== 'manual' || S.sketch) return; hideQuickActions(); stop(); if (S.cursor < S.ops.length) { alertUser(`Nueva rama desde el paso ${S.cursor}: se descartan los movimientos posteriores.`); S.ops.splice(S.cursor); S.noops.splice(S.cursor); for (const k of [...S.check.keys()]) if (k > S.cursor) S.check.delete(k) } const was = snapshot(S.a, S.b); mutate(S.a, S.b, op); S.ops.push(op); S.noops.push(same(was.a, S.a) && same(was.b, S.b)); S.cursor++; if (S.cursor % CHECK === 0) S.check.set(S.cursor, snapshot(S.a, S.b)); draw(!S.noops[S.cursor - 1], dropFrom) }
+  function manually(op, dropFrom = null) { if (S.mode !== 'manual' || S.sketch) return; hideQuickActions(); stop(); if (S.cursor < S.ops.length) { alertUser(`Nueva rama desde el paso ${S.cursor}: se descartan los movimientos posteriores.`); S.ops.splice(S.cursor); S.noops.splice(S.cursor); for (const k of [...S.check.keys()]) if (k > S.cursor) S.check.delete(k) } if (S.cursor >= MAX_OPS) { alertUser(`Límite de ${MAX_OPS.toLocaleString("es-ES")} operaciones alcanzado.`, true); return } const was = snapshot(S.a, S.b); mutate(S.a, S.b, op); S.ops.push(op); S.noops.push(same(was.a, S.a) && same(was.b, S.b)); S.cursor++; if (S.cursor % CHECK === 0) S.check.set(S.cursor, snapshot(S.a, S.b)); draw(!S.noops[S.cursor - 1], dropFrom) }
   function loadManualNumbers() { try { const nums = parseNumbers($('numbersInput').value); S.largeReplay = null; reset(nums); if (nums.length > MANUAL_LIM) { setMode('replay'); alertUser(`${nums.length} números cargados en Reproducir (práctica manual: hasta ${MANUAL_LIM}).`) } else alertUser('Números cargados. Ya podés practicar.') } catch (err) { showError('numberError', err.message) } }
   function generate() {    
 try {
@@ -82,7 +82,67 @@ try {
       showError('numberError', ''); alertUser(`${n} números únicos · ${$('disorderReadout').textContent} de desorden${n > MANUAL_LIM ? ' · modo Reproducir' : ''}.`);
     } catch (err) { showError('numberError', err.message) }  
 }
-  function loadSequence() { if (S.sketch) leaveSketch(); try { const commands = parseOps($('operationsInput').value); if (!commands.length && !isSorted(S.initial)) throw Error('La secuencia está vacía, pero los números aún no están ordenados.'); stop(); S.ops = commands; S.cursor = 0; S.a = S.initial.slice(); S.b = []; const valid = buildCheckpoints(); draw(false); showError('operationsError', ''); alertUser(commands.length ? `Cargadas ${S.ops.length} instrucciones. ${valid ? 'La secuencia ordena las pilas.' : 'La secuencia no termina ordenada.'}` : 'Sin movimientos: los números ya están ordenados.') } catch (err) { showError('operationsError', err.message) } }
+  function validateSequenceText(raw) {
+    // Keep enormous pasted input from exhausting memory before parsing.
+    if (raw.length > MAX_TEXT_BYTES) throw Error('El texto supera el límite de 1 MiB.');
+    const commands = parseOps(raw);
+    if (!commands.length && !isSorted(S.initial)) throw Error('La secuencia está vacía, pero los números aún no están ordenados.');
+    return commands;
+  }
+  function applySequence(commands) {
+    if (S.sketch) leaveSketch();
+    stop(); S.ops = commands; S.cursor = 0; S.a = S.initial.slice(); S.b = [];
+    const valid = buildCheckpoints(); draw(false); showError('operationsError', '');
+    alertUser(commands.length ? `Cargadas ${S.ops.length} instrucciones. ${valid ? 'La secuencia ordena las pilas.' : 'La secuencia no termina ordenada.'}` : 'Sin movimientos: los números ya están ordenados.');
+  }
+  function loadSequence() {
+    try { applySequence(validateSequenceText($('operationsInput').value)); }
+    catch (err) { showError('operationsError', err.message); }
+  }
+  // File contents are plain data; do not interpret them as HTML or executable code.
+  let importRequest = 0;
+  async function importOperationsFile(file) {
+    const request = ++importRequest;
+    try {
+      if (!file) return;
+      if (!/\.txt$/i.test(file.name)) throw Error('Elegí un archivo con extensión .txt.');
+      if (file.size > MAX_TEXT_BYTES) throw Error('El archivo supera el límite de 1 MiB.');
+      const content = await file.text();
+      if (request !== importRequest) return;
+      // Validate the entire file before touching the previous editor and sequence.
+      const commands = validateSequenceText(content);
+      $('operationsInput').value = content;
+      applySequence(commands);
+    } catch (err) {
+      if (request === importRequest) {
+        const msg = err instanceof Error ? err.message : 'No se pudo leer el archivo.';
+        showError('operationsError', msg);
+        alertUser(msg, true);
+      }
+    }
+  }
+  function installTxtImporter() {
+    const zone = $('operationsDropzone'), picker = $('operationsFile');
+    const filesBeingDragged = e => Array.from(e.dataTransfer?.types || []).includes('Files');
+    const highlight = on => zone.classList.toggle('dragging', on);
+    $('importTxtBtn').addEventListener('click', () => { picker.value = ''; picker.click(); });
+    picker.addEventListener('change', () => { if (picker.files?.length) void importOperationsFile(picker.files[0]); });
+    zone.addEventListener('dragenter', e => { if (!filesBeingDragged(e)) return; e.preventDefault(); highlight(true); });
+    zone.addEventListener('dragover', e => { if (!filesBeingDragged(e)) return; e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; highlight(true); });
+    zone.addEventListener('dragleave', e => { if (!zone.contains(e.relatedTarget)) highlight(false); });
+    zone.addEventListener('drop', e => {
+      if (!filesBeingDragged(e)) return;
+      e.preventDefault(); highlight(false);
+      const files = e.dataTransfer?.files;
+      if (files?.length !== 1) { showError('operationsError', 'Soltá un único archivo .txt.'); return; }
+      void importOperationsFile(files[0]);
+    });
+    // Dropping on the rest of the page must not navigate away and erase the workspace.
+    document.addEventListener('dragover', e => { if (filesBeingDragged(e)) e.preventDefault(); });
+    document.addEventListener('drop', e => { if (filesBeingDragged(e)) { e.preventDefault(); highlight(false); } });
+    document.addEventListener('dragend', () => highlight(false));
+  }
+
   function setMode(mode) {
     if (mode === 'manual' && S.initial.length > MANUAL_LIM) {
       // Start a fresh, manageable exercise on demand, without rejecting the tab.
@@ -410,7 +470,7 @@ const d = pointerDrag; if (!d || d.id !== e.pointerId) return; const dx = e.clie
   document.querySelectorAll('[data-view]').forEach(b => b.addEventListener('click', () => switchView(b.dataset.view)));
   $('copyNumbers').addEventListener('click', copyNumbers); $('loadNumbers').addEventListener('click', loadManualNumbers); $('numbersInput').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); loadManualNumbers() } }); $('generateBtn').addEventListener('click', generate); $('countInput').addEventListener('input', syncPreset);
   $('tabManual').addEventListener('click', () => setMode('manual')); $('tabReplay').addEventListener('click', () => setMode('replay')); document.querySelectorAll('[data-op]').forEach(btn => btn.addEventListener('click', () => manually(btn.dataset.op)));
-  $('loadOperations').addEventListener('click', loadSequence);
+  $('loadOperations').addEventListener('click', loadSequence); installTxtImporter();
   const EXAMPLE5 = { numbers: [5, 2, 4, 3, 1], moves: ['pb', 'sa', 'rra', 'sa', 'ra', 'pa', 'ra'] };
   // Ten numbers, 23 operations: keep a circularly sorted subsequence in A,
   // push the other values to B and reinsert using combined rotations.

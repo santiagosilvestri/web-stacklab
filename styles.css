@@ -692,3 +692,18 @@ body.is-dragging .stack-box.drop-allowed .stack-direction::after{content:none}
   .timeline-wrap { min-width: 0; width: 100%; }
   .speed-control { width: 100%; min-width: 0; max-width: none; }
 }
+
+/* Local TXT import: integrated into the existing operations editor. */
+.file-input-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
+.file-input-head .label{margin-bottom:0}
+.import-txt{display:inline-flex;align-items:center;justify-content:center;gap:5px;min-height:30px;padding:5px 8px;background:#f7f9f6;border:1px solid #dce4da;border-radius:6px;color:#416459;font-family:inherit;font-size:11px;font-weight:650;line-height:1.2;white-space:nowrap;cursor:pointer}
+.import-txt:hover{background:#ecf3ee;border-color:#a8c1b0}
+.import-txt:focus-visible,.operation-dropzone:focus-within{outline:2px solid #698f7a;outline-offset:2px}
+.visually-hidden{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
+.operation-dropzone{position:relative;border-radius:6px;transition:box-shadow .15s}
+.operation-dropzone .op-input{margin:0}
+.operation-dropzone.dragging{box-shadow:0 0 0 2px #8ba995}
+.operation-dropzone.dragging .op-input{border-color:#729581;background:#f4faf5}
+.drop-overlay{display:none;pointer-events:none;position:absolute;inset:0;z-index:2;align-items:center;justify-content:center;flex-direction:column;gap:10px;border:2px dashed #729581;border-radius:6px;color:#345f49;background:#eef5eef2;font-size:12px;font-weight:650;padding:16px;text-align:center}
+.operation-dropzone.dragging .drop-overlay{display:flex}
+@media(prefers-reduced-motion:reduce){.operation-dropzone{transition:none}}
